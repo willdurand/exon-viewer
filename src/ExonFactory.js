@@ -1,42 +1,49 @@
 function exonFactory(exonPositions) {
-
-  let exons_x = [];
-  let exons_y = [];
-  let exons_text = [];
-
-  for(let i=0; i<exonPositions.length; i++) {
+  const exons_by_gene = {};
+  for (let i=0; i<exonPositions.length; i++) {
     let start = exonPositions[i].start;
     let end = exonPositions[i].end;
     let text = exonPositions[i].gene;
 
-    exons_x.push(Number(start));
-    exons_x.push(Number(end));
-    exons_y.push(-36);
-    exons_y.push(-36);
-    exons_text.push(text);
-    exons_text.push(text);
+    const v = exons_by_gene[text] || { x: [], y: [], text: [] };
 
-    exons_x.push(NaN);
-    exons_y.push(NaN);
-    exons_text.push(NaN);
+    v.x.push(Number(start));
+    v.x.push(Number(end));
+    v.y.push(-36);
+    v.y.push(-36);
+    v.text.push(text);
+    v.text.push(text);
+
+    v.x.push(NaN);
+    v.y.push(NaN);
+    v.text.push(NaN);
+
+    exons_by_gene[text] = v;
   }
 
-  const exons = [{
-    x: exons_x,
-    y: exons_y,
-    type: 'scattergl',
-    text: exons_text,
-    connectgaps: false,
-    name: 'Exon markers',
-    showlegend: false,
-    line: {width: 8, color: 'red'}
-  }];
+  return Object.keys(exons_by_gene).map((gene, index) => {
+    const { x, y, text } = exons_by_gene[gene];
 
-  return exons;
+    return {
+      x,
+      y,
+      xaxis: index === 0 ? undefined : `x${index + 1}`,
+      yaxis: index === 0 ? undefined : `y${index + 1}`,
+      type: 'scattergl',
+      text,
+      connectgaps: false,
+      hoverinfo: 'x+text',
+      name: gene,
+      showlegend: false,
+      line: {
+        width: 6,
+      }
+    };
+  });
 }
 
 function depthFactory(depths, names) {
-  
+
   if (depths.length !== names.length) {
       let e = new Error('# of depth measurements unequal to # of measurement names');
       throw(e);
@@ -49,7 +56,7 @@ function depthFactory(depths, names) {
     let depth = depths[i];
     let trace = {
       mode: 'lines+markers',
-      type: 'scattergl', 
+      type: 'scattergl',
       connectgaps: false,
       line: {width: 0.5},
       marker: {size: 2},
@@ -76,7 +83,7 @@ function depthFactory(depths, names) {
         text.push(NaN);
       // }
     }
-  
+
     trace.x = x;
     trace.y = y;
     trace.text = text;

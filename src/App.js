@@ -70,7 +70,7 @@ class App extends Component {
       that.setState({
         exonMarkers: exonMarkers,
         depths: traceCollection
-      });      
+      });
     });
 
   }
@@ -78,17 +78,60 @@ class App extends Component {
   render() {
 
     let data = this.state.exonMarkers;
-    data = data.concat(this.state.depths);
+    //data = data.concat(this.state.depths);
+
+    const nbPlots = data.length;
+    const step = 1./nbPlots;
 
     let layout = {
-        width: 1000,
-        yaxis: {fixedrange: true},
-		margin: {t:10},
-		height: 300,
-        hovermode: 'closest'
+      yaxis: {
+        fixedrange: true,
+        domain: [0, step],
+      },
+      xaxis: {
+        zeroline: false,
+        showlines: false,
+        showgrid: false,
+        ticks: '',
+        showticklabels: false,
+      },
+      yaxis: {
+        zeroline: false,
+        ticks: '',
+        showgrid: false,
+        showticklabels: false,
+        fixedrange: true,
+      },
+      margin: {
+        t: 0,
+        r: 0,
+        b: 0,
+      },
+      height: nbPlots * 100,
+      hovermode: 'x',
     };
 
-    // console.warn(data, layout);
+    let inf = step;
+    for (let i = 1; i < nbPlots; i++) {
+      layout[`xaxis${i+1}`] = {
+        anchor: `y${i+1}`,
+      };
+      layout[`yaxis${i+1}`] = {
+        fixedrange: true,
+        zeroline: false,
+        ticks: '',
+        showgrid: false,
+        showticklabels: false,
+        domain: [inf, inf + step],
+        title: data[i].name,
+      };
+      inf += step;
+    }
+
+    const style = {
+      width: '95%',
+      height: '100%',
+    };
 
     return (
       <div className="App">
@@ -96,11 +139,10 @@ class App extends Component {
         <Plot
           data={data}
           layout={layout}
-          style={{marginTop: 50, marginLeft: 50}}
+          style={style}
+          useResizeHandler
           config={{
-              modeBarButtonsToRemove: ['sendDataToCloud','autoScale2d','resetScale2d',
-                                      'lasso2d'], 
-              doubleClick: false
+            doubleClick: false
           }}
         />
       </div>
