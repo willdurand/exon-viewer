@@ -1,14 +1,19 @@
 function exonFactory(exonPositions) {
   const exons_by_gene = {};
-  for (let i=0; i<exonPositions.length; i++) {
+
+
+  for (let i = 0; i < exonPositions.length; i++) {
     let start = exonPositions[i].start;
     let end = exonPositions[i].end;
     let text = exonPositions[i].gene;
 
     const v = exons_by_gene[text] || { x: [], y: [], text: [] };
 
+    //v.x.push(Number(end) - Number(start));
+    //v.x.push(0);
     v.x.push(Number(start));
     v.x.push(Number(end));
+
     v.y.push(-36);
     v.y.push(-36);
     v.text.push(text);
@@ -24,19 +29,34 @@ function exonFactory(exonPositions) {
   return Object.keys(exons_by_gene).map((gene, index) => {
     const { x, y, text } = exons_by_gene[gene];
 
+    const downscaledX = [];
+
+    let sum = 0;
+    for (let i = 0; i < x.length; i += 3) {
+      const len = x[i + 1] - x[i];
+
+      //console.log({gene, s: x[i], e: x[i + 1], len})
+
+      downscaledX.push(sum);
+      downscaledX.push(sum + len);
+      downscaledX.push(x[i + 2]);
+
+      sum = sum + len + 10;
+    }
+
     return {
-      x,
+      x: downscaledX,
       y,
       xaxis: index === 0 ? undefined : `x${index + 1}`,
       yaxis: index === 0 ? undefined : `y${index + 1}`,
       type: 'scattergl',
       text,
       connectgaps: false,
-      hoverinfo: 'x+text',
+      hoverinfo: 'none',
       name: gene,
       showlegend: false,
       line: {
-        width: 6,
+        width: 8,
       }
     };
   });
