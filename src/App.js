@@ -45,9 +45,7 @@ class App extends Component {
     const q = d3.queue();
 
     const depths = [k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12, k13, k14, k15];
-    const names = ['K60451', 'K60509', 'K60520', 'K60521', 'K60552', 'K60553',
-                  'K63706', 'K63717', 'K64130', 'K64783', 'K64784', 'K64785',
-                  'K67026', 'K67880', 'K68270'];
+    const names = ['K60451', 'K60509', 'K60520', 'K60521', 'K60552', 'K60553', 'K63706', 'K63717', 'K64130', 'K64783', 'K64784', 'K64785', 'K67026', 'K67880', 'K68270'];
 
     q.defer(d3.tsv, exons);
 
@@ -59,13 +57,13 @@ class App extends Component {
 
       const exonObj = geneObjects.splice(0, 1);
 
-      console.warn(exonObj[0]);
+      //console.warn(exonObj[0]);
 
       let exonMarkers = exonFactory(exonObj[0]);
 
       let traceCollection = depthFactory(geneObjects, names);
 
-      console.warn(traceCollection);
+      //console.warn(traceCollection);
 
       that.setState({
         exonMarkers: exonMarkers,
@@ -84,23 +82,21 @@ class App extends Component {
     const step = 1./nbPlots;
 
     let layout = {
-      yaxis: {
-        fixedrange: true,
-        domain: [0, step],
-      },
       xaxis: {
-        zeroline: false,
-        showlines: false,
         showgrid: false,
-        ticks: '',
+        showlines: false,
         showticklabels: false,
+        ticks: '',
+        zeroline: false,
       },
       yaxis: {
-        zeroline: false,
-        ticks: '',
+        domain: [0, step],
+        fixedrange: true,
         showgrid: false,
         showticklabels: false,
-        fixedrange: true,
+        ticks: '',
+        title: data[0] ? data[0].name : null,
+        zeroline: false,
       },
       margin: {
         t: 0,
@@ -115,6 +111,11 @@ class App extends Component {
     for (let i = 1; i < nbPlots; i++) {
       layout[`xaxis${i+1}`] = {
         anchor: `y${i+1}`,
+        showgrid: false,
+        showlines: false,
+        showticklabels: false,
+        ticks: '',
+        zeroline: false,
       };
       layout[`yaxis${i+1}`] = {
         fixedrange: true,
