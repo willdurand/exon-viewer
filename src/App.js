@@ -59,9 +59,18 @@ class App extends Component {
 
       //console.warn(exonObj[0]);
 
-      let exonMarkers = exonFactory(exonObj[0]);
+      const {
+        axes,
+        exons: exonMarkers,
+        exons_by_gene,
+      } = exonFactory(exonObj[0]);
 
-      let traceCollection = depthFactory(geneObjects, names);
+      let traceCollection = depthFactory(
+        geneObjects,
+        names,
+        exons_by_gene,
+        axes,
+      );
 
       //console.warn(traceCollection);
 
@@ -74,12 +83,12 @@ class App extends Component {
   }
 
   render() {
-
     let data = this.state.exonMarkers;
-    //data = data.concat(this.state.depths);
 
     const nbPlots = data.length;
     const step = 1./nbPlots;
+
+    data = data.concat(this.state.depths);
 
     let layout = {
       xaxis: {
@@ -103,7 +112,7 @@ class App extends Component {
         r: 0,
         b: 0,
       },
-      height: nbPlots * 100,
+      height: nbPlots * 150,
       hovermode: 'x',
     };
 
