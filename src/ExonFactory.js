@@ -1,5 +1,7 @@
+const DOWNSCALE = false;
+
 // generate random colors
-const colors = Array(30).map(() => {
+const colors = Array(40).map(() => {
   return '#'+'0123456789abcdef'.split('').map((v, i, a) => {
     return i > 5 ? null : a[Math.floor(Math.random()*16)];
   }).join('');
@@ -9,25 +11,23 @@ function exonFactory(exonPositions) {
   const exons_by_gene = {};
 
   for (let i = 0; i < exonPositions.length; i++) {
-    let start = exonPositions[i].start;
-    let end = exonPositions[i].end;
+    let start = Number(exonPositions[i].start);
+    let end = Number(exonPositions[i].end);
     let text = exonPositions[i].gene;
 
     const v = exons_by_gene[text] || { x: [], y: [], text: [], start, end };
 
-    //v.x.push(Number(end) - Number(start));
-    //v.x.push(0);
-    v.x.push(Number(start));
-    v.x.push(Number(end));
+    v.x.push(start);
+    v.x.push(end);
 
     v.y.push(-36);
     v.y.push(-36);
-    v.text.push(text);
-    v.text.push(text);
+    //v.text.push(text);
+    //v.text.push(text);
 
     v.x.push(NaN);
     v.y.push(NaN);
-    v.text.push(NaN);
+    //v.text.push(NaN);
 
     if (start < v.start) {
       v.start = start;
@@ -44,22 +44,22 @@ function exonFactory(exonPositions) {
   const exons = Object.keys(exons_by_gene).map((gene, index) => {
     const { x, y, text } = exons_by_gene[gene];
 
-    const downscaledX = x;
+    const downscaledX = DOWNSCALE ? [] : x;
 
-    /*
-    let sum = 0;
-    for (let i = 0; i < x.length; i += 3) {
-      const len = x[i + 1] - x[i];
+    if (DOWNSCALE) {
+      let sum = 0;
+      for (let i = 0; i < x.length; i += 3) {
+        const len = x[i + 1] - x[i];
 
-      //console.log({gene, s: x[i], e: x[i + 1], len})
+        //console.log({gene, s: x[i], e: x[i + 1], len})
 
-      downscaledX.push(sum);
-      downscaledX.push(sum + len);
-      downscaledX.push(x[i + 2]);
+        downscaledX.push(sum);
+        downscaledX.push(sum + len);
+        downscaledX.push(x[i + 2]);
 
-      sum = sum + len + 10;
+        sum = sum + len + 10;
+      }
     }
-    */
 
     axes[gene] = {
       xaxis: index === 0 ? undefined : `x${index + 1}`,
@@ -71,14 +71,14 @@ function exonFactory(exonPositions) {
       x: downscaledX,
       y,
       type: 'scattergl',
-      text,
+      //text,
       connectgaps: false,
       hoverinfo: 'none',
       name: gene,
       showlegend: false,
       line: {
         width: 8,
-        color: colors[index],
+        color: colors[20 + index],
       }
     };
   });
@@ -108,9 +108,17 @@ function depthFactory(depths, names, exons_by_gene, axes) {
       const depth = depths[i][j];
 
       Object.keys(exons_by_gene).forEach((gene) => {
-        const { start, end } = exons_by_gene[gene];
+        const { x, start, end } = exons_by_gene[gene];
         const v = depths_by_gene[gene] || new Set();
 
+        /*
+        TOO SLOW
+        for (let k = 0; k < x.length; k += 3) {
+          if (depth.start >= x[k] && depth.end <= x[k + 1]) {
+            v.add(depth);
+          }
+        }
+        */
         if (depth.start >= start && depth.end <= end) {
           v.add(depth);
         }
@@ -129,7 +137,7 @@ function depthFactory(depths, names, exons_by_gene, axes) {
     Object.keys(depths_by_gene).forEach((gene) => {
       const trace = {
         ...axes[gene],
-        mode: 'markers',
+        mode: 'lines+markers',
         type: 'scattergl',
         connectgaps: false,
         line: {
@@ -143,9 +151,10 @@ function depthFactory(depths, names, exons_by_gene, axes) {
         name,
         legendgroup: name,
         showlegend,
+        hoverinfo: 'none',
         x: [],
         y: [],
-        text: [],
+        //text: [],
       };
 
       // show legend only for the first trace for each depth name
@@ -160,12 +169,30 @@ function depthFactory(depths, names, exons_by_gene, axes) {
         trace.y.push(depth.depth);
         trace.y.push(NaN);
 
-        trace.text.push(depth.chromosome);
-        trace.text.push(depth.chromosome);
-        trace.text.push(NaN);
+        //trace.text.push(depth.chromosome);
+        //trace.text.push(depth.chromosome);
+        //trace.text.push(NaN);
       });
 
-      allTraces.push(trace);
+      const downscaledX = DOWNSCALE ? [] : trace.x;
+
+      if (DOWNSCALE) {
+        let sum = 0;
+        for (let i = 0; i < trace.x.length; i += 3) {
+          const len = trace.x[i + 1] - trace.x[i];
+
+          downscaledX.push(sum);
+          downscaledX.push(sum + len);
+          downscaledX.push(trace.x[i + 2]);
+
+          sum = sum + len + 10;
+        }
+      }
+
+      allTraces.push({
+        ...trace,
+        x: downscaledX,
+      });
     });
   });
 

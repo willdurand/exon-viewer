@@ -113,7 +113,6 @@ class App extends Component {
         b: 0,
       },
       height: nbPlots * 150,
-      hovermode: 'x',
     };
 
     let inf = step;
