@@ -135,7 +135,7 @@ function depthFactory(depths, names, exons_by_gene, axes) {
     Object.keys(depths_by_gene).forEach((gene) => {
       const trace = {
         ...axes[gene],
-        mode: 'lines+markers',
+        mode: 'markers',
         type: 'scattergl',
         connectgaps: false,
         line: {
