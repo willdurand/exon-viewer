@@ -42,7 +42,7 @@ function exonFactory(exonPositions) {
 
   const axes = {};
   const exons = Object.keys(exons_by_gene).map((gene, index) => {
-    const { x, y, text } = exons_by_gene[gene];
+    const { x, y } = exons_by_gene[gene];
 
     const downscaledX = DOWNSCALE ? [] : x;
 
@@ -51,11 +51,9 @@ function exonFactory(exonPositions) {
       for (let i = 0; i < x.length; i += 3) {
         const len = x[i + 1] - x[i];
 
-        //console.log({gene, s: x[i], e: x[i + 1], len})
-
-        downscaledX.push(sum);
-        downscaledX.push(sum + len);
-        downscaledX.push(x[i + 2]);
+        downscaledX.push(Number(sum));
+        downscaledX.push(Number(sum + len));
+        downscaledX.push(x[i + 2]); // should be NaN
 
         sum = sum + len + 10;
       }
@@ -108,7 +106,7 @@ function depthFactory(depths, names, exons_by_gene, axes) {
       const depth = depths[i][j];
 
       Object.keys(exons_by_gene).forEach((gene) => {
-        const { x, start, end } = exons_by_gene[gene];
+        const { start, end } = exons_by_gene[gene];
         const v = depths_by_gene[gene] || new Set();
 
         /*
@@ -141,7 +139,7 @@ function depthFactory(depths, names, exons_by_gene, axes) {
         type: 'scattergl',
         connectgaps: false,
         line: {
-          width: 1,
+          width: .5,
           color: colors[index],
         },
         marker: {
@@ -161,12 +159,12 @@ function depthFactory(depths, names, exons_by_gene, axes) {
       showlegend = false;
 
       depths_by_gene[gene].forEach((depth) => {
-        trace.x.push(depth.start);
-        trace.x.push(depth.end);
+        trace.x.push(Number(depth.start));
+        trace.x.push(Number(depth.end));
         trace.x.push(NaN);
 
-        trace.y.push(depth.depth);
-        trace.y.push(depth.depth);
+        trace.y.push(Number(depth.depth));
+        trace.y.push(Number(depth.depth));
         trace.y.push(NaN);
 
         //trace.text.push(depth.chromosome);
@@ -181,9 +179,9 @@ function depthFactory(depths, names, exons_by_gene, axes) {
         for (let i = 0; i < trace.x.length; i += 3) {
           const len = trace.x[i + 1] - trace.x[i];
 
-          downscaledX.push(sum);
-          downscaledX.push(sum + len);
-          downscaledX.push(trace.x[i + 2]);
+          downscaledX.push(Number(sum));
+          downscaledX.push(Number(sum + len));
+          downscaledX.push(trace.x[i + 2]); // should be NaN
 
           sum = sum + len + 10;
         }
