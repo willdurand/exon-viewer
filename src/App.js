@@ -12,18 +12,14 @@ import k3 from './data/depths/K60520.values.txt';
 import k4 from './data/depths/K60521.values.txt';
 import k5 from './data/depths/K60552.values.txt';
 import k6 from './data/depths/K60553.values.txt';
-
 import k7 from './data/depths/K63706.values.txt';
 import k8 from './data/depths/K63717.values.txt';
-
 import k9 from './data/depths/K64130.values.txt';
 import k10 from './data/depths/K64783.values.txt';
 import k11 from './data/depths/K64784.values.txt';
 import k12 from './data/depths/K64785.values.txt';
-
 import k13 from './data/depths/K67026.values.txt';
 import k14 from './data/depths/K67880.values.txt';
-
 import k15 from './data/depths/K68270.values.txt';
 
 /* (Note that Plotly is already defined from loading plotly.js through a <script> tag) */
@@ -33,6 +29,8 @@ class App extends Component {
 
   constructor(props) {
     super(props);
+
+    this.colors = ['green', 'blue', 'darkred', 'purple', 'orange', 'brown', 'pink', 'lightgreen', 'lightblue', 'magenta', 'darkgreen', 'coral', 'aliceblue', 'gold', 'red',];
 
     this.state = {
       exonMarkers: [],
@@ -63,13 +61,14 @@ class App extends Component {
         axes,
         exons: exonMarkers,
         exons_by_gene,
-      } = exonFactory(exonObj[0]);
+      } = exonFactory(exonObj[0], that.colors);
 
       let traceCollection = depthFactory(
         geneObjects,
         names,
         exons_by_gene,
         axes,
+        that.colors,
       );
 
       //console.warn(traceCollection);
