@@ -26,6 +26,9 @@ import k15 from './data/depths/K68270.values.txt';
 const Plot = createPlotlyComponent(Plotly);
 
 class App extends Component {
+  static defaultProps = {
+    withoutIntrons: window.location.search.indexOf('downscale=1') !== -1,
+  };
 
   constructor(props) {
     super(props);
@@ -40,6 +43,9 @@ class App extends Component {
 
   componentDidMount() {
     let that = this;
+
+    const { withoutIntrons } = this.props;
+
     const q = d3.queue();
 
     const depths = [k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12, k13, k14, k15];
@@ -61,7 +67,7 @@ class App extends Component {
         axes,
         exons: exonMarkers,
         exons_by_gene,
-      } = exonFactory(exonObj[0], that.colors);
+      } = exonFactory(exonObj[0], that.colors, withoutIntrons);
 
       let traceCollection = depthFactory(
         geneObjects,
@@ -69,6 +75,7 @@ class App extends Component {
         exons_by_gene,
         axes,
         that.colors,
+        withoutIntrons,
       );
 
       //console.warn(traceCollection);
@@ -78,7 +85,6 @@ class App extends Component {
         depths: traceCollection
       });
     });
-
   }
 
   render() {
@@ -144,6 +150,13 @@ class App extends Component {
     return (
       <div className="App">
         <p style={{marginLeft: 50}}>Built using plotly.js WebGL. Initial load can take as long as 30 seconds.</p>
+        <p style={{marginLeft: 50}}>
+          {this.props.withoutIntrons ? (
+            <a href="?downscale=0">with introns</a>
+          ) : (
+            <a href="?downscale=1">with introns removed</a>
+          )}
+        </p>
         <Plot
           data={data}
           layout={layout}
