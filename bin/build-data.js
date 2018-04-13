@@ -65,21 +65,18 @@ const build = async () => {
   for (let i = 0; i < exonPositions.length; i++) {
     let start = Number(exonPositions[i].start);
     let end = Number(exonPositions[i].end);
-    let text = exonPositions[i].gene;
+    let gene = exonPositions[i].gene;
 
-    const v = exons_by_gene[text] || { x: [], y: [], text: [], start, end };
+    const v = exons_by_gene[gene] || { x: [], y: [], start, end };
 
     v.x.push(start);
     v.x.push(end);
 
     v.y.push(-36);
     v.y.push(-36);
-    //v.text.push(text);
-    //v.text.push(text);
 
     v.x.push(NaN);
     v.y.push(NaN);
-    //v.text.push(NaN);
 
     if (start < v.start) {
       v.start = start;
@@ -89,7 +86,7 @@ const build = async () => {
       v.end = end;
     }
 
-    exons_by_gene[text] = v;
+    exons_by_gene[gene] = v;
   }
 
   console.time(`compute depths`);
@@ -101,18 +98,6 @@ const build = async () => {
     const sample = geneObjects[i];
 
     console.time(`compute depths for "${name}"`);
-
-    /*
-        .filter((gene) => {
-            const { start, end } = exons_by_gene[gene];
-
-            if (Number(sample[0].start) > Number(end) || Number(sample[sample.length - 1].end) < Number(start)) {
-                return false;
-            }
-
-            return true;
-        });
-        */
 
     for (let j = 0; j < sample.length; j++) {
       const depth = sample[j];
@@ -132,19 +117,6 @@ const build = async () => {
         let de = Number(depth.end);
 
         for (let k = 0; k < x.length; k += 3) {
-          /*
-                    if (
-                        (ds >= Number(x[k]) && ds <= Number(x[k + 1])) ||
-                        (de >= Number(x[k]) && de <= Number(x[k + 1]))
-                    ) {
-                        if (ds < Number(x[k])) {
-                            ds = Number(x[k]);
-                        }
-
-                        if (de > Number(x[k + 1])) {
-                            de = Number(x[k + 1]);
-                        }
-                        */
           if (ds >= Number(x[k]) && de <= Number(x[k + 1])) {
             trace.x.push(Number(ds));
             trace.x.push(Number(de));
@@ -165,8 +137,21 @@ const build = async () => {
 
   console.timeEnd(`compute depths`);
 
-  fs.writeFile(path.join(__dirname, '../src/data/exons-cached-data.json'), JSON.stringify(exons_by_gene), () => console.log('pre-generate exons: done'));
-  fs.writeFile(path.join(__dirname, '../src/data/depths-cached-data.json'), JSON.stringify(traces), () => console.log('pre-depths: done'));
+  Object.keys(exons_by_gene).forEach((gene) => {
+    delete exons_by_gene[gene].start;
+    delete exons_by_gene[gene].end;
+  });
+
+  fs.writeFile(
+    path.join(__dirname, '../src/data/exons-cached-data.json'),
+    JSON.stringify(exons_by_gene),
+    () => console.log('pre-generate exons: done')
+  );
+  fs.writeFile(
+    path.join(__dirname, '../src/data/depths-cached-data.json'),
+    JSON.stringify(traces),
+    () => console.log('pre-depths: done')
+  );
 };
 
 build();

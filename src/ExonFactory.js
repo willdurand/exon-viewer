@@ -28,7 +28,6 @@ function exonFactory(exonsByGene, colors, downScale) {
       x: downscaledX,
       y,
       type: 'scattergl',
-      //text,
       connectgaps: false,
       hoverinfo: 'none',
       name: gene,
@@ -36,7 +35,7 @@ function exonFactory(exonsByGene, colors, downScale) {
       line: {
         width: 8,
         color: colors[index],
-      }
+      },
     };
   });
 
@@ -128,17 +127,18 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
 
 export const createPlot = ({
   exonsByGene,
+  exonsColors,
   depthsByNameAndGene,
-  colors,
+  depthsColors,
   withoutIntrons = false,
 }) => {
-  const { axes, exons } = exonFactory(exonsByGene, colors, withoutIntrons);
+  const { axes, exons } = exonFactory(exonsByGene, exonsColors, withoutIntrons);
 
   const depths = depthFactory(
     depthsByNameAndGene,
     exonsByGene,
     axes,
-    colors,
+    depthsColors,
     withoutIntrons,
   );
 

@@ -31,8 +31,9 @@ class App extends Component {
 
     this.setState(createPlot({
       exonsByGene,
+      exonsColors: this.colors,
       depthsByNameAndGene,
-      colors: this.colors,
+      depthsColors: this.colors,
       withoutIntrons,
     }));
   }
