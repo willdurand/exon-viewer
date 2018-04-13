@@ -4,6 +4,7 @@ function exonFactory(exonsByGene, colors, downScale) {
     const { x, y } = exonsByGene[gene];
 
     const downscaledX = downScale ? [] : x;
+    const text = downScale ? [] : x;
 
     if (downScale) {
       let sum = 0;
@@ -13,6 +14,10 @@ function exonFactory(exonsByGene, colors, downScale) {
         downscaledX.push(Number(sum));
         downscaledX.push(Number(sum) + len);
         downscaledX.push(x[i + 2]); // should be NaN
+
+        text.push(Number(x[i]));
+        text.push(Number(x[i + 1]));
+        text.push(NaN);
 
         sum = sum + len + 10;
       }
@@ -27,9 +32,10 @@ function exonFactory(exonsByGene, colors, downScale) {
       ...axes[gene],
       x: downscaledX,
       y,
+      text,
       type: 'scattergl',
       connectgaps: false,
-      hoverinfo: 'none',
+      hoverinfo: 'text',
       name: gene,
       showlegend: false,
       line: {
@@ -59,6 +65,7 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
     return {
       ...axes[gene],
       ...entry,
+      text: entry.x,
       mode: 'markers',
       type: 'scattergl',
       connectgaps: false,
@@ -73,7 +80,7 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
       name,
       legendgroup: name,
       showlegend: !showLegend,
-      hoverinfo: 'none',
+      hoverinfo: 'text+name',
     };
   });
 
@@ -104,6 +111,7 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
       const downscaledX = [];
       const { g: gene, x } = traces[key];
 
+      const text = [];
       for (let i = 0; i < x.length; i += 3) {
         const start = Number(x[i]);
         const end = Number(x[i + 1]);
@@ -116,9 +124,14 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
             downscaledX.push(x[i + 2]); // should be NaN
           }
         });
+
+        text.push(start);
+        text.push(end);
+        text.push(NaN);
       }
 
       traces[key].x = downscaledX;
+      traces[key].text = text;
     });
   }
 
@@ -150,6 +163,7 @@ export const createPlot = ({
   data = data.concat(depths);
 
   const layout = {
+    hovermode: 'closest',
     xaxis: {
       showgrid: false,
       showlines: false,
