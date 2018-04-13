@@ -1,14 +1,7 @@
-import exonsByGene from './data/exons-cached-data.json';
-import depthsByNameAndGene from './data/depths-cached-data.json';
-
-function exonFactory(exonPositions, colors, downScale) {
+function exonFactory(exonsByGene, colors, downScale) {
   const axes = {};
-  const exons_by_gene = exonsByGene;
-
-  console.time(`create exon traces`);
-
-  const exons = Object.keys(exons_by_gene).map((gene, index) => {
-    const { x, y } = exons_by_gene[gene];
+  const exons = Object.keys(exonsByGene).map((gene, index) => {
+    const { x, y } = exonsByGene[gene];
 
     const downscaledX = downScale ? [] : x;
 
@@ -47,21 +40,13 @@ function exonFactory(exonPositions, colors, downScale) {
     };
   });
 
-  console.timeEnd(`create exon traces`);
-
   return {
     axes,
     exons,
-    exons_by_gene,
   };
 }
 
-function depthFactory(depths, names, exons_by_gene, axes, colors, downScale) {
-  if (depths.length !== names.length) {
-    let e = new Error('# of depth measurements unequal to # of measurement names');
-    throw(e);
-  }
-
+function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale) {
   const showLegends = {};
   const traces = Object.keys(depthsByNameAndGene).map((k) => {
     const entry = depthsByNameAndGene[k];
@@ -79,7 +64,7 @@ function depthFactory(depths, names, exons_by_gene, axes, colors, downScale) {
       type: 'scattergl',
       connectgaps: false,
       line: {
-        width: .5,
+        width: 1,
         color: colors[depthId],
       },
       marker: {
@@ -94,11 +79,9 @@ function depthFactory(depths, names, exons_by_gene, axes, colors, downScale) {
   });
 
   if (downScale) {
-    console.time(`downscale depths`);
-
     const exonPairs = {};
-    Object.keys(exons_by_gene).forEach((key) => {
-      const { x } = exons_by_gene[key];
+    Object.keys(exonsByGene).forEach((key) => {
+      const { x } = exonsByGene[key];
 
       const pairs = [];
       let sum = 0;
@@ -138,11 +121,83 @@ function depthFactory(depths, names, exons_by_gene, axes, colors, downScale) {
 
       traces[key].x = downscaledX;
     });
-
-    console.timeEnd(`downscale depths`);
   }
 
   return Object.values(traces);
 }
 
-export {exonFactory, depthFactory}
+export const createPlot = ({
+  exonsByGene,
+  depthsByNameAndGene,
+  colors,
+  withoutIntrons = false,
+}) => {
+  const { axes, exons } = exonFactory(exonsByGene, colors, withoutIntrons);
+
+  const depths = depthFactory(
+    depthsByNameAndGene,
+    exonsByGene,
+    axes,
+    colors,
+    withoutIntrons,
+  );
+
+  let data = exons;
+
+  const nbPlots = data.length;
+  const step = 1./nbPlots;
+
+  data = data.concat(depths);
+
+  const layout = {
+    xaxis: {
+      showgrid: false,
+      showlines: false,
+      showticklabels: false,
+      ticks: '',
+      zeroline: false,
+    },
+    yaxis: {
+      domain: [0, step],
+      fixedrange: true,
+      showgrid: false,
+      showticklabels: false,
+      ticks: '',
+      title: data[0] ? data[0].name : null,
+      zeroline: false,
+    },
+    margin: {
+      t: 0,
+      r: 0,
+      b: 0,
+    },
+    height: nbPlots * 150,
+  };
+
+  let inf = step;
+  for (let i = 1; i < nbPlots; i++) {
+    layout[`xaxis${i+1}`] = {
+      anchor: `y${i+1}`,
+      showgrid: false,
+      showlines: false,
+      showticklabels: false,
+      ticks: '',
+      zeroline: false,
+    };
+    layout[`yaxis${i+1}`] = {
+      fixedrange: true,
+      zeroline: false,
+      ticks: '',
+      showgrid: false,
+      showticklabels: false,
+      domain: [inf, inf + step],
+      title: data[i].name,
+    };
+    inf += step;
+  }
+
+  return {
+    data,
+    layout,
+  };
+};

@@ -1,5 +1,3 @@
-Factory for creating WebGL track viewer
+# Exon Viewer demo
 
-http://human-genome-exons.getforge.io/
 
-(Give it a few seconds to load)

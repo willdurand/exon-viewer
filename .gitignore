@@ -19,3 +19,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# pre-generated data
+src/data/depths-cached-data.json
+src/data/exons-cached-data.json
