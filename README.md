@@ -7,14 +7,18 @@ You will find a `ExonFactory.js` file in `src/`. This file exposes a
 `createPlot()` function that should be called to retrieve the `data` and
 `layout` variables to use with [plotly.js](https://plot.ly/javascript/).
 
-```
+``` js
 const { data, layout } = createPlot({
     exonsByGene,
-    exonsColors: this.colors,
+    exonsColors,
     depthsByNameAndGene,
-    depthsColors: this.colors,
+    depthsColors,
     withoutIntrons,
 });
+
+// ...
+
+Plotly.newPlot('myDiv', data, layout);
 ```
 
 This function is parametrized with an object containing the following parameters:
