@@ -6,6 +6,7 @@ import { createPlot } from './ExonFactory';
 
 import exonsByGene from './data/exons-cached-data.json';
 import depthsByNameAndGene from './data/depths-cached-data.json';
+import tinyDepthsByNameAndGene from './data/tiny-depths-cached-data.json';
 
 /* (Note that Plotly is already defined from loading plotly.js through a <script> tag) */
 const Plot = createPlotlyComponent(Plotly);
@@ -13,6 +14,7 @@ const Plot = createPlotlyComponent(Plotly);
 class App extends Component {
   static defaultProps = {
     withoutIntrons: window.location.search.indexOf('downscale=1') !== -1,
+    withTinyDataset: window.location.search.indexOf('tiny=1') !== -1,
   };
 
   constructor(props) {
@@ -27,19 +29,31 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const { withoutIntrons } = this.props;
+    const { withoutIntrons, withTinyDataset } = this.props;
+    const dataset = withTinyDataset ? tinyDepthsByNameAndGene : depthsByNameAndGene;
 
-    this.setState(createPlot({
+    const { data, layout } = createPlot({
       exonsByGene,
       exonsColors: this.colors,
-      depthsByNameAndGene,
+      depthsByNameAndGene: dataset,
       depthsColors: this.colors,
       withoutIntrons,
-    }));
+    });
+
+    this.setState({
+      data,
+      layout,
+    });
   }
 
   render() {
     const { data, layout } = this.state;
+    const { withoutIntrons, withTinyDataset } = this.props;
+
+    const fullDatasetURL = `?tiny=0&downscale=${withoutIntrons ? 1 : 0}`;
+    const tinyDatasetURL = `?tiny=1&downscale=${withoutIntrons ? 1 : 0}`;
+    const originalURL = `?tiny=${withTinyDataset ? 1 : 0}&downscale=0`;
+    const downscaleURL = `?tiny=${withTinyDataset ? 1 : 0}&downscale=1`;
 
     const style = {
       width: '95%',
@@ -48,14 +62,34 @@ class App extends Component {
 
     return (
       <div className="App">
-        <p style={{marginLeft: 50}}>Built using plotly.js WebGL. Initial load can take as long as 30 seconds.</p>
         <p style={{marginLeft: 50}}>
-          {this.props.withoutIntrons ? (
-            <a href="?downscale=0">with introns</a>
+          Built using plotly.js WebGL. Initial load can take as long as 30 seconds.
+        </p>
+        <p style={{marginLeft: 50}}>
+          <span role="img">📊</span>
+          {withTinyDataset ? (
+            <React.Fragment>
+              <span>Tiny dataset loaded</span>
+              &nbsp;&mdash;&nbsp;
+              <a href={fullDatasetURL}>load full dataset</a>
+            </React.Fragment>
           ) : (
-            <a href="?downscale=1">with introns removed</a>
+            <React.Fragment>
+              <span>Full dataset loaded</span>
+              &nbsp;&mdash;&nbsp;
+              <a href={tinyDatasetURL}>load tiny dataset</a>
+            </React.Fragment>
           )}
         </p>
+        <p style={{marginLeft: 50}}>
+          <span role="img">🔎</span>
+          {withoutIntrons ? (
+            <a href={originalURL}>display introns</a>
+          ) : (
+            <a href={downscaleURL}>remove introns</a>
+          )}
+        </p>
+        <hr />
         <Plot
           data={data}
           layout={layout}
