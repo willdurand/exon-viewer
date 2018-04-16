@@ -67,16 +67,10 @@ const build = async () => {
     let end = Number(exonPositions[i].end);
     let gene = exonPositions[i].gene;
 
-    const v = exons_by_gene[gene] || { x: [], y: [], start, end };
+    const v = exons_by_gene[gene] || { x: [], start, end };
 
     v.x.push(start);
     v.x.push(end);
-
-    v.y.push(-36);
-    v.y.push(-36);
-
-    v.x.push(NaN);
-    v.y.push(NaN);
 
     if (start < v.start) {
       v.start = start;
@@ -116,7 +110,7 @@ const build = async () => {
         let ds = Number(depth.start);
         let de = Number(depth.end);
 
-        for (let k = 0; k < x.length; k += 3) {
+        for (let k = 0; k < x.length; k += 2) {
           if (ds >= Number(x[k]) && de <= Number(x[k + 1])) {
             trace.x.push(Number(ds));
             trace.x.push(Number(de));
@@ -137,14 +131,15 @@ const build = async () => {
 
   console.timeEnd(`compute depths`);
 
-  Object.keys(exons_by_gene).forEach((gene) => {
-    delete exons_by_gene[gene].start;
-    delete exons_by_gene[gene].end;
-  });
+  const exonsByGene = Object.keys(exons_by_gene).reduce((map, gene) => {
+    map[gene] = exons_by_gene[gene].x;
+
+    return map;
+  }, {});
 
   fs.writeFile(
     path.join(__dirname, '../src/data/exons-cached-data.json'),
-    JSON.stringify(exons_by_gene),
+    JSON.stringify(exonsByGene),
     () => console.log('pre-generate exons: done')
   );
   fs.writeFile(

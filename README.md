@@ -37,63 +37,27 @@ This function is parametrized with an object containing the following parameters
 The `createPlot()` function takes two datasets as input: `exonsByGene` and
 `depthsByGeneAndName` (both are JavaScript objects).
 
-The `exonsByGene` shape is a hash map with the gene name as key and a set of
-properties as value (see example below). Each gene has two properties `x` and
-`y`. `x` owns the exons and `y` only contains fixed values. Between each exon
-(i.e. `start` and `end` positions), a `null` value must be inserted. Each exon
-position must have a corresonding `y` value equal to `-36`, and each `null`
-value in `x` must also have a `null` value in `y`.
+The `exonsByGene` shape is a hash map with the gene name as key and an array of
+exon positions as value, as shown below:
 
 ``` js
 const exonsByGene = {
-    "DDX11L1": {
-        "x": [
-            11868,
-            12227,
-            null,
-            12612,
-            12721,
-            null,
-            13220,
-            14409,
-            null
-        ],
-        "y": [
-            -36,
-            -36,
-            null,
-            -36,
-            -36,
-            null,
-            -36,
-            -36,
-            null
-        ]
-    },
-    "SAMD11": {
-        "x": [
-            860259,
-            860328,
-            null,
-            860529,
-            860569,
-            null,
-            861117,
-            861180,
-            null,
-        ],
-        "y": [
-            -36,
-            -36,
-            null,
-            -36,
-            -36,
-            null,
-            -36,
-            -36,
-            null,
-        ]
-    }
+    "DDX11L1": [
+        11868,
+        12227,
+        12612,
+        12721,
+        13220,
+        14409,
+    ],
+    "SAMD11": [
+        860259,
+        860328,
+        860529,
+        860569,
+        861117,
+        861180,
+    ]
 };
 ```
 

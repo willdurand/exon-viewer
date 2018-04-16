@@ -1,25 +1,46 @@
+const PADDING = 10;
+
 function exonFactory(exonsByGene, colors, downScale) {
   const axes = {};
   const exons = Object.keys(exonsByGene).map((gene, index) => {
-    const { x, y } = exonsByGene[gene];
+    const positions = exonsByGene[gene];
 
-    const downscaledX = downScale ? [] : x;
-    const text = downScale ? [] : x;
+    const xValues = [];
+    const yValues = [];
+    const textValues = [];
 
     if (downScale) {
       let sum = 0;
-      for (let i = 0; i < x.length; i += 3) {
-        const len = Number(x[i + 1]) - Number(x[i]);
+      for (let i = 0; i < positions.length; i += 2) {
+        const len = Number(positions[i + 1]) - Number(positions[i]);
 
-        downscaledX.push(Number(sum));
-        downscaledX.push(Number(sum) + len);
-        downscaledX.push(x[i + 2]); // should be NaN
+        xValues.push(Number(sum));
+        xValues.push(Number(sum) + len);
+        xValues.push(NaN);
 
-        text.push(Number(x[i]));
-        text.push(Number(x[i + 1]));
-        text.push(NaN);
+        yValues.push(-36);
+        yValues.push(-36);
+        yValues.push(NaN);
 
-        sum = sum + len + 10;
+        textValues.push(Number(positions[i]));
+        textValues.push(Number(positions[i + 1]));
+        textValues.push(NaN);
+
+        sum = sum + len + PADDING;
+      }
+    } else {
+      for (let i = 0; i < positions.length; i += 2) {
+        xValues.push(Number(positions[i]));
+        xValues.push(Number(positions[i + 1]));
+        xValues.push(NaN);
+
+        yValues.push(-36);
+        yValues.push(-36);
+        yValues.push(NaN);
+
+        textValues.push(Number(positions[i]));
+        textValues.push(Number(positions[i + 1]));
+        textValues.push(NaN);
       }
     }
 
@@ -30,9 +51,9 @@ function exonFactory(exonsByGene, colors, downScale) {
 
     return {
       ...axes[gene],
-      x: downscaledX,
-      y,
-      text,
+      x: xValues,
+      y: yValues,
+      text: textValues,
       type: 'scattergl',
       connectgaps: false,
       hoverinfo: 'text',
@@ -52,20 +73,70 @@ function exonFactory(exonsByGene, colors, downScale) {
 }
 
 function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale) {
+  const exonPairs = {};
+
+  if (downScale) {
+    Object.keys(exonsByGene).forEach((key) => {
+      const positions = exonsByGene[key];
+
+      const pairs = [];
+      let sum = 0;
+      for (let i = 0; i < positions.length; i += 2) {
+        const len = Number(positions[i + 1]) - Number(positions[i]);
+
+        pairs.push({
+          start: Number(positions[i]),
+          end: Number(positions[i + 1]),
+          len,
+          startAt: Number(sum),
+        });
+
+        sum = sum + len + PADDING;
+      }
+
+      exonPairs[key] = pairs;
+    });
+  }
+
   const showLegends = {};
   const traces = Object.keys(depthsByNameAndGene).map((k) => {
     const entry = depthsByNameAndGene[k];
-    const { g: gene, i: depthId, n: name } = entry;
+    const { x, g: gene, i: depthId, n: name } = entry;
+
     delete entry.i;
     delete entry.n;
+
+    const xValues = downScale ? [] : x;
+    const textValues = downScale ? [] : x;
+
+    if (downScale) {
+      for (let i = 0; i < x.length; i += 3) {
+        const start = Number(x[i]);
+        const end = Number(x[i + 1]);
+        const len = Number(end - start);
+
+        exonPairs[gene].forEach((pair) => {
+          if (start >= Number(pair.start) && end <= Number(pair.end)) {
+            xValues.push(start - Number(pair.start) + pair.startAt);
+            xValues.push(Number(len));
+            xValues.push(x[i + 2]); // should be NaN
+          }
+        });
+
+        textValues.push(start);
+        textValues.push(end);
+        textValues.push(NaN);
+      }
+    }
 
     const showLegend = showLegends[name] || false;
     showLegends[name] = true;
 
     return {
       ...axes[gene],
-      ...entry,
-      text: entry.x,
+      x: xValues,
+      y: entry.y,
+      text: textValues,
       mode: 'markers',
       type: 'scattergl',
       connectgaps: false,
@@ -80,60 +151,9 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
       name,
       legendgroup: name,
       showlegend: !showLegend,
-      hoverinfo: 'text+name',
+      hoverinfo: 'text+y+name',
     };
   });
-
-  if (downScale) {
-    const exonPairs = {};
-    Object.keys(exonsByGene).forEach((key) => {
-      const { x } = exonsByGene[key];
-
-      const pairs = [];
-      let sum = 0;
-      for (let i = 0; i < x.length; i += 3) {
-        const len = Number(x[i + 1]) - Number(x[i]);
-
-        pairs.push({
-          start: Number(x[i]),
-          end: Number(x[i + 1]),
-          len,
-          startAt: Number(sum),
-        });
-
-        sum = sum + len + 10;
-      }
-
-      exonPairs[key] = pairs;
-    });
-
-    Object.keys(traces).forEach((key) => {
-      const downscaledX = [];
-      const { g: gene, x } = traces[key];
-
-      const text = [];
-      for (let i = 0; i < x.length; i += 3) {
-        const start = Number(x[i]);
-        const end = Number(x[i + 1]);
-        const len = Number(end - start);
-
-        exonPairs[gene].forEach((pair) => {
-          if (start >= Number(pair.start) && end <= Number(pair.end)) {
-            downscaledX.push(start - Number(pair.start) + pair.startAt);
-            downscaledX.push(Number(len));
-            downscaledX.push(x[i + 2]); // should be NaN
-          }
-        });
-
-        text.push(start);
-        text.push(end);
-        text.push(NaN);
-      }
-
-      traces[key].x = downscaledX;
-      traces[key].text = text;
-    });
-  }
 
   return Object.values(traces);
 }
@@ -145,7 +165,13 @@ export const createPlot = ({
   depthsColors,
   withoutIntrons = false,
 }) => {
+  console.time('exonFactory()');
+
   const { axes, exons } = exonFactory(exonsByGene, exonsColors, withoutIntrons);
+
+  console.timeEnd('exonFactory()');
+
+  console.time('depthFactory()');
 
   const depths = depthFactory(
     depthsByNameAndGene,
@@ -154,6 +180,8 @@ export const createPlot = ({
     depthsColors,
     withoutIntrons,
   );
+
+  console.timeEnd('depthFactory()');
 
   let data = exons;
 
