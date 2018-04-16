@@ -12,7 +12,9 @@
     "d3": "^5.0.0",
     "fs-extra": "^5.0.0",
     "gh-pages": "^1.1.0",
-    "react-scripts": "1.1.1"
+    "react-scripts": "1.1.1",
+    "request": "^2.85.0",
+    "request-promise-native": "^1.0.5"
   },
   "scripts": {
     "start": "react-scripts --max-old-space-size=8192 start",
