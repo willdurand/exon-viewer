@@ -13,7 +13,7 @@ const Plot = createPlotlyComponent(Plotly);
 
 class App extends Component {
   static defaultProps = {
-    withoutIntrons: window.location.search.indexOf('downscale=1') !== -1,
+    removeIntrons: window.location.search.indexOf('downscale=1') !== -1,
     withTinyDataset: window.location.search.indexOf('tiny=1') !== -1,
   };
 
@@ -27,13 +27,13 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const { withoutIntrons, withTinyDataset } = this.props;
+    const { removeIntrons, withTinyDataset } = this.props;
     const dataset = withTinyDataset ? tinyDepthsByNameAndGene : depthsByNameAndGene;
 
     const { data, layout } = createPlot({
       exonsByGene,
       depthsByNameAndGene: dataset,
-      withoutIntrons,
+      removeIntrons,
     });
 
     this.setState({
@@ -44,10 +44,10 @@ class App extends Component {
 
   render() {
     const { data, layout } = this.state;
-    const { withoutIntrons, withTinyDataset } = this.props;
+    const { removeIntrons, withTinyDataset } = this.props;
 
-    const fullDatasetURL = `?tiny=0&downscale=${withoutIntrons ? 1 : 0}`;
-    const tinyDatasetURL = `?tiny=1&downscale=${withoutIntrons ? 1 : 0}`;
+    const fullDatasetURL = `?tiny=0&downscale=${removeIntrons ? 1 : 0}`;
+    const tinyDatasetURL = `?tiny=1&downscale=${removeIntrons ? 1 : 0}`;
     const originalURL = `?tiny=${withTinyDataset ? 1 : 0}&downscale=0`;
     const downscaleURL = `?tiny=${withTinyDataset ? 1 : 0}&downscale=1`;
 
@@ -79,7 +79,7 @@ class App extends Component {
         </p>
         <p style={{marginLeft: 50}}>
           <span role="img">🔎</span>
-          {withoutIntrons ? (
+          {removeIntrons ? (
             <a href={originalURL}>display introns</a>
           ) : (
             <a href={downscaleURL}>remove introns</a>

@@ -193,11 +193,11 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, downScale) {
 export const createPlot = ({
   exonsByGene,
   depthsByNameAndGene,
-  withoutIntrons = false,
+  removeIntrons = false,
 }) => {
   console.time('exonFactory()');
 
-  const { axes, exons } = exonFactory(exonsByGene, withoutIntrons);
+  const { axes, exons } = exonFactory(exonsByGene, removeIntrons);
 
   console.timeEnd('exonFactory()');
 
@@ -207,7 +207,7 @@ export const createPlot = ({
     depthsByNameAndGene,
     exonsByGene,
     axes,
-    withoutIntrons,
+    removeIntrons,
   );
 
   console.timeEnd('depthFactory()');
