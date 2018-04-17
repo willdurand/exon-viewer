@@ -90,7 +90,6 @@ const build = async () => {
         const trace = traces[`${name}-${gene}`] || {
           n: name,
           g: gene,
-          i,
           x: [],
           y: [],
         };
@@ -102,11 +101,9 @@ const build = async () => {
           if (ds >= Number(x[k]) && de <= Number(x[k + 1])) {
             trace.x.push(Number(ds));
             trace.x.push(Number(de));
-            trace.x.push(NaN);
 
             trace.y.push(Number(depthY));
             trace.y.push(Number(depthY));
-            trace.y.push(NaN);
           }
         }
 

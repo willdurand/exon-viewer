@@ -1,6 +1,9 @@
 const PADDING = 10;
+const COLORS = ['green', 'blue', 'darkred', 'purple', 'orange', 'brown',
+                'pink', 'lightgreen', 'lightblue', 'magenta', 'darkgreen',
+                'coral', 'aliceblue', 'gold', 'red',];
 
-function exonFactory(exonsByGene, colors, downScale) {
+function exonFactory(exonsByGene, downScale) {
   const axes = {};
   const exons = Object.keys(exonsByGene).map((gene, index) => {
     const positions = exonsByGene[gene];
@@ -61,7 +64,7 @@ function exonFactory(exonsByGene, colors, downScale) {
       showlegend: false,
       line: {
         width: 8,
-        color: colors[index],
+        color: COLORS[index],
       },
     };
   });
@@ -72,7 +75,7 @@ function exonFactory(exonsByGene, colors, downScale) {
   };
 }
 
-function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale) {
+function depthFactory(depthsByNameAndGene, exonsByGene, axes, downScale) {
   const exonPairs = {};
 
   if (downScale) {
@@ -98,30 +101,59 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
     });
   }
 
+  const depths = Object.keys(depthsByNameAndGene).reduce((acc, k) => {
+    const name = depthsByNameAndGene[k]['n'];
+
+    if (!acc.includes(name)) {
+      acc.push(name);
+    }
+
+    return acc;
+  }, []);
+
   const showLegends = {};
   const traces = Object.keys(depthsByNameAndGene).map((k) => {
-    const entry = depthsByNameAndGene[k];
-    const { x, g: gene, i: depthId, n: name } = entry;
+    const { x, y, g: gene, n: name } = depthsByNameAndGene[k];
 
-    delete entry.i;
-    delete entry.n;
-
-    const xValues = downScale ? [] : x;
-    const textValues = downScale ? [] : x;
+    const depthId = depths.findIndex((n) => n === name);
+    const xValues = [];
+    const yValues = [];
+    const textValues = [];
 
     if (downScale) {
-      for (let i = 0; i < x.length; i += 3) {
+      for (let i = 0; i < x.length; i += 2) {
         const start = Number(x[i]);
         const end = Number(x[i + 1]);
         const len = Number(end - start);
 
         exonPairs[gene].forEach((pair) => {
-          if (start >= Number(pair.start) && end <= Number(pair.end)) {
-            xValues.push(start - Number(pair.start) + pair.startAt);
-            xValues.push(Number(len));
-            xValues.push(x[i + 2]); // should be NaN
+          if (start >= pair.start && end <= pair.end) {
+            xValues.push(start - pair.start + pair.startAt);
+            xValues.push(len);
+            xValues.push(NaN);
+
+            yValues.push(Number(y[i]));
+            yValues.push(Number(y[i + 1]));
+            yValues.push(NaN);
+
+            textValues.push(start);
+            textValues.push(end);
+            textValues.push(NaN);
           }
         });
+      }
+    } else {
+      for (let i = 0; i < x.length; i += 2) {
+        const start = Number(x[i]);
+        const end = Number(x[i + 1]);
+
+        xValues.push(start);
+        xValues.push(end);
+        xValues.push(NaN);
+
+        yValues.push(Number(y[i]));
+        yValues.push(Number(y[i + 1]));
+        yValues.push(NaN);
 
         textValues.push(start);
         textValues.push(end);
@@ -135,18 +167,18 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
     return {
       ...axes[gene],
       x: xValues,
-      y: entry.y,
+      y: yValues,
       text: textValues,
       mode: 'markers',
       type: 'scattergl',
       connectgaps: false,
       line: {
         width: 1,
-        color: colors[depthId],
+        color: COLORS[depthId],
       },
       marker: {
         size: 2,
-        color: colors[depthId],
+        color: COLORS[depthId],
       },
       name,
       legendgroup: name,
@@ -160,14 +192,12 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, colors, downScale)
 
 export const createPlot = ({
   exonsByGene,
-  exonsColors,
   depthsByNameAndGene,
-  depthsColors,
   withoutIntrons = false,
 }) => {
   console.time('exonFactory()');
 
-  const { axes, exons } = exonFactory(exonsByGene, exonsColors, withoutIntrons);
+  const { axes, exons } = exonFactory(exonsByGene, withoutIntrons);
 
   console.timeEnd('exonFactory()');
 
@@ -177,7 +207,6 @@ export const createPlot = ({
     depthsByNameAndGene,
     exonsByGene,
     axes,
-    depthsColors,
     withoutIntrons,
   );
 

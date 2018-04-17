@@ -61,55 +61,44 @@ const exonsByGene = {
 };
 ```
 
-The `depthsByGeneAndName` shape is also a hash map with the gene name + depths
-file name as key and a set of properties as value (see example below). Each
-entry (e.g., `K60451-DDX11L1`) has a gene name (`g`), a depth file ID (`i` that
-is used to determine the color), the depth file name (`n`), the positions of the
-depths (`x`, same principle as before with `start`, `end` and a `null` value),
-and the depth values in `y`.
+The `depthsByGeneAndName` shape is also a hash map with a unique key for each
+gene + depth couple and a set of properties as value (see example below). Each
+entry (e.g., `K60451-DDX11L1`) has a gene name (`g`), the depth file name (`n`),
+the positions of the depths in `x`, and the depth values in `y`. The lengths of
+`x` and `y` must be equal.
 
 ``` js
 {
     "K60451-DDX11L1": {
         "g": "DDX11L1",
-        "i": 0,
         "n": "K60451",
         "x": [
             11868,
             11875,
-            null,
             11875,
             11885,
-            null,
         ],
         "y": [
             4,
             4,
-            null,
             3,
             3,
-            null,
         ]
     },
     "K60451-SAMD11": {
         "g": "SAMD11",
-        "i": 0,
         "n": "K60451",
         "x": [
             11868,
             11875,
-            null,
             11875,
             11885,
-            null,
         ],
         "y": [
             4,
             4,
-            null,
             3,
             3,
-            null,
         ]
     },
     ...

@@ -20,8 +20,6 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    this.colors = ['green', 'blue', 'darkred', 'purple', 'orange', 'brown', 'pink', 'lightgreen', 'lightblue', 'magenta', 'darkgreen', 'coral', 'aliceblue', 'gold', 'red',];
-
     this.state = {
       data: null,
       layout: null,
@@ -34,9 +32,7 @@ class App extends Component {
 
     const { data, layout } = createPlot({
       exonsByGene,
-      exonsColors: this.colors,
       depthsByNameAndGene: dataset,
-      depthsColors: this.colors,
       withoutIntrons,
     });
 
