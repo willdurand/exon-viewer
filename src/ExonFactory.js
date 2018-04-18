@@ -1,4 +1,4 @@
-const PADDING = 10;
+const PADDING = 70;
 const COLORS = ['green', 'blue', 'darkred', 'purple', 'orange', 'brown',
                 'pink', 'lightgreen', 'lightblue', 'magenta', 'darkgreen',
                 'coral', 'aliceblue', 'gold', 'red',];
