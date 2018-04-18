@@ -1,15 +1,11 @@
-/* global Plotly:true */
-
 import React, { Component } from 'react';
-import createPlotlyComponent from 'react-plotly.js/factory';
+import Plot from 'react-plotly.js';
+
 import { createPlot } from './ExonFactory';
 
 import exonsByGene from './data/exons-cached-data.json';
 import depthsByNameAndGene from './data/depths-cached-data.json';
 import tinyDepthsByNameAndGene from './data/tiny-depths-cached-data.json';
-
-/* (Note that Plotly is already defined from loading plotly.js through a <script> tag) */
-const Plot = createPlotlyComponent(Plotly);
 
 class App extends Component {
   static defaultProps = {
