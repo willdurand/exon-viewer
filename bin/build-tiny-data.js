@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const request = require('request-promise-native');
 
-const exons = 'src/data/exons.chrom.start.end.gene-name.txt';
+const exons = 'src/data/exons.bed.txt';
 const names = ['K60451', 'K60509', 'K60520', 'K60521', 'K60552', 'K60553', 'K63706', 'K63717', 'K64130', 'K64783', 'K64784', 'K64785', 'K67026', 'K67880', 'K68270'];
 
 const promises = [];
@@ -52,22 +52,24 @@ const build = async () => {
   for (let i = 0; i < exonPositions.length; i++) {
     let start = Number(exonPositions[i].start);
     let end = Number(exonPositions[i].end);
-    let gene = exonPositions[i].gene;
+    let genes = exonPositions[i].gene.split(',');
 
-    const v = exons_by_gene[gene] || { x: [], start, end };
+    genes.forEach((gene) => {
+      const v = exons_by_gene[gene] || { x: [], start, end };
 
-    v.x.push(start);
-    v.x.push(end);
+      v.x.push(start);
+      v.x.push(end);
 
-    if (start < v.start) {
-      v.start = start;
-    }
+      if (start < v.start) {
+        v.start = start;
+      }
 
-    if (end > v.end) {
-      v.end = end;
-    }
+      if (end > v.end) {
+        v.end = end;
+      }
 
-    exons_by_gene[gene] = v;
+      exons_by_gene[gene] = v;
+    });
   }
 
   console.time(`compute depths`);

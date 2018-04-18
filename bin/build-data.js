@@ -3,7 +3,7 @@ const d3 = require('d3');
 const fs = require('fs-extra');
 const path = require('path');
 
-const exons = 'src/data/exons.chrom.start.end.gene-name.txt';
+const exons = 'src/data/exons.bed.txt';
 const k1 = 'src/data/depths/K60451.values.txt';
 const k2 = 'src/data/depths/K60509.values.txt';
 const k3 = 'src/data/depths/K60520.values.txt';
@@ -65,22 +65,24 @@ const build = async () => {
   for (let i = 0; i < exonPositions.length; i++) {
     let start = Number(exonPositions[i].start);
     let end = Number(exonPositions[i].end);
-    let gene = exonPositions[i].gene;
+    let genes = exonPositions[i].gene.split(',');
 
-    const v = exons_by_gene[gene] || { x: [], start, end };
+    genes.forEach((gene) => {
+      const v = exons_by_gene[gene] || { x: [], start, end };
 
-    v.x.push(start);
-    v.x.push(end);
+      v.x.push(start);
+      v.x.push(end);
 
-    if (start < v.start) {
-      v.start = start;
-    }
+      if (start < v.start) {
+        v.start = start;
+      }
 
-    if (end > v.end) {
-      v.end = end;
-    }
+      if (end > v.end) {
+        v.end = end;
+      }
 
-    exons_by_gene[gene] = v;
+      exons_by_gene[gene] = v;
+    });
   }
 
   console.time(`compute depths`);
