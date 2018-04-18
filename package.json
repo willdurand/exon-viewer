@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "homepage": "https://plotly.github.io/exon-viewer/",
   "dependencies": {
-    "plotly.js": "^1.35.2",
+    "plotly.js": "^1.36.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-plotly.js": "^2.1.0"
