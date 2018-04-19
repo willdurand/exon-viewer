@@ -129,7 +129,7 @@ function depthFactory(depthsByNameAndGene, exonsByGene, axes, downScale) {
         exonPairs[gene].forEach((pair) => {
           if (start >= pair.start && end <= pair.end) {
             xValues.push(start - pair.start + pair.startAt);
-            xValues.push(len);
+            xValues.push(start - pair.start + pair.startAt + len);
             xValues.push(NaN);
 
             yValues.push(Number(y[i]));
